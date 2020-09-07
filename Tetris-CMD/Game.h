@@ -5,14 +5,6 @@
 
 using namespace std;
 
-
-
-
-//锚点
-//struct Point {
-//	Point(int a, int b) :x(a), y(b) {}
-//	int x, y;
-//};
 class Vector2 {
 public:
 	Vector2() { x = 0; y = 0; }
@@ -20,18 +12,19 @@ public:
 	int x, y;
 };
 
+//锚点
 class Point {
 public:
 	Point(int a, int b) :col(a), row(b) {}
+	//位置
 	int col, row;
+	//移动方向
 	int dir_x = 0, dir_y = 0;
-
-	Vector2 pos, dir;
 };
 
 class Game {
 public:
-	~Game();
+
 	bool Initialize();
 	void Loop();
 	void Shutdown();

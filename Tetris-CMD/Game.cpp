@@ -3,13 +3,6 @@
 
 
 
-Game::~Game()
-{
-	for (int i = 0; i < mapSize.y; i++) {
-		delete[] map[i];
-	}
-	delete[] map;
-}
 
 bool Game::Initialize()
 {
@@ -51,7 +44,10 @@ void Game::Loop()
 
 void Game::Shutdown()
 {
-
+	for (int i = 0; i < mapSize.y; i++) {
+		delete[] map[i];
+	}
+	delete[] map;
 }
 
 
