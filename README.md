@@ -2,7 +2,7 @@
 
 WithFileSystem
 
-[](http://llag.net/markdown-img/Tetris-CMD/Tetris-CMD.gif)
+![](http://llag.net/markdown-img/Tetris-CMD/Tetris-CMD.gif)
 
 
 使用CMDGameTemplate项目作为模板测试
