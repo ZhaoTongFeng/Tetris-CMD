@@ -38,10 +38,6 @@ private:
 	//输出图像
 	void GenerateOutput();
 
-
-
-	//设置锚点所占地图区域，用于碰撞检测
-	void SetArea();
 	//碰撞检测
 	bool CheckArea(unsigned char targetBlock[4][4]);
 

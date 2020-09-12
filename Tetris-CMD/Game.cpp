@@ -1,8 +1,8 @@
-﻿
-#include "Game.h"
-
-
-
+﻿#include "Game.h"
+#define _LOOP_ACTIVITY_BEGIN for (int i = 0; i < boxLength; i++) {for (int j = 0; j < boxLength; j++) {
+#define _LOOP_ACTIVITY_END }}
+#define _LOOP_MAP_BEGIN for (int i = 0; i < mapSize.y; i++) {for (int j = 0; j < mapSize.x; j++) {
+#define _LOOP_MAP_END }}
 
 bool Game::Initialize()
 {
@@ -21,15 +21,10 @@ bool Game::Initialize()
 			}
 		}
 	}
-
-
 	tickCount = clock();
-
 	SpawnBlock();
-
 	return true;
 }
-
 
 void Game::Loop()
 {
@@ -37,7 +32,6 @@ void Game::Loop()
 		ProcessInput();
 		UpdateGame();
 		GenerateOutput();
-
 	}
 }
 
@@ -50,7 +44,6 @@ void Game::Shutdown()
 	delete[] map;
 }
 
-
 void Game::ProcessInput()
 {
 	//处理输入
@@ -60,30 +53,22 @@ void Game::ProcessInput()
 
 	if (_kbhit())
 	{
-		update = false;
+		update = true;
 		int key = _getch();
 		if (key == 'a') {
 			p->dir_x -= 1;
-			//开启更新
-			update = true;
 		}
 		if (key == 'd') {
 			p->dir_x += 1;
-			update = true;
 		}
 		if (key == 's') {
 			p->dir_y += 1;
-			update = true;
 		}
 		if (key == 'w') {
 			rotate = true;
-			update = true;
 		}
 	}
 }
-
-
-
 
 void Game::UpdateGame()
 {
@@ -95,17 +80,14 @@ void Game::UpdateGame()
 	}
 
 	//更新游戏
-	if (!update) {
-		return;
-	}
-	//左右移动
+	if (!update) { return; }
 
+	//左右移动
 	if (p->dir_x != 0) {
 		p->col += p->dir_x;
 		if (CheckArea(currentBlock)) {
 			p->col -= p->dir_x;
 		}
-
 	}
 
 	//向下移动
@@ -123,8 +105,6 @@ void Game::UpdateGame()
 	}
 }
 
-
-
 void Game::SpawnBlock()
 {
 	delete p;
@@ -134,48 +114,36 @@ void Game::SpawnBlock()
 	numIndex = rand() % typeLength;
 	//设置当前形状下标
 	blockIndex = sumNum[numIndex] + rand() % blockNum[numIndex];
-
 	SetCurrentBlock();
 	//地图中生成方块
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			map[p->row + i][p->col + j] = currentBlock[boxLength - i - 1][j];
-		}
-	}
+	_LOOP_ACTIVITY_BEGIN;
+	map[p->row + i][p->col + j] = currentBlock[boxLength - i - 1][j];
+	_LOOP_ACTIVITY_END;
 }
 
 void Game::Rotate()
 {
-
 	//旋转之后的下标
 	int temp = blockIndex;
 	blockIndex = sumNum[numIndex] + (((blockIndex - sumNum[numIndex]) % blockNum[numIndex]) + 1) % blockNum[numIndex];
 	unsigned char targetBlock[4][4];
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			targetBlock[i][j] = blocks[blockIndex][i][j];
-		}
-	}
+	_LOOP_ACTIVITY_BEGIN;
+	targetBlock[i][j] = blocks[blockIndex][i][j];
+	_LOOP_ACTIVITY_END;
 	if (CheckArea(targetBlock)) {
 		blockIndex = temp;
 	}
 	else {
 		SetCurrentBlock();
 	}
-
 }
-
-
 
 void Game::SetCurrentBlock()
 {
-	for (int i = 0; i < boxLength; i++) {
-		for (int y = 0; y < boxLength; y++) {
-			currentBlock[i][y] = blocks[blockIndex][i][y];
-		}
-	}
+	_LOOP_ACTIVITY_BEGIN;
+	currentBlock[i][j] = blocks[blockIndex][i][j];
+	_LOOP_ACTIVITY_END;
 }
-
 
 void Game::RemoveRow()
 {
@@ -186,7 +154,6 @@ void Game::RemoveRow()
 				sum++;
 			}
 		}
-
 		if (sum == activitySize.x) {
 			for (int n = i; n > 0; n--) {
 				for (int m = 0; m < mapSize.x; m++) {
@@ -195,94 +162,77 @@ void Game::RemoveRow()
 			}
 		}
 	}
-
 }
 
 void Game::FixBlocks()
 {
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			int x = p->row - boxLength + 1 + i;
-			if (map[x][p->col + j] == 1) {
-				//检查游戏是否结束
-				if (x == 5) {
-					isRunning = false;
-					return;
-				}
-				map[x][p->col + j] = 2;
-			}
+	_LOOP_ACTIVITY_BEGIN;
+	int x = p->row - boxLength + 1 + i;
+	if (map[x][p->col + j] == 1) {
+		//检查游戏是否结束
+		if (x == 5) {
+			isRunning = false;
+			return;
 		}
+		map[x][p->col + j] = 2;
 	}
+	_LOOP_ACTIVITY_END;
 	RemoveRow();
 	SpawnBlock();
 }
 
-void Game::SetArea()
-{
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			area[i][j] = map[p->row - boxLength + 1 + i][p->col + j];//小心数组越界
-		}
-	}
-}
-
-
 bool Game::CheckArea(unsigned char targetBlock[4][4])
 {
-	SetArea();
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			if ((area[i][j] == 3 || area[i][j] == 2) && targetBlock[i][j] == 1) {
-				return true;
-			}
-		}
+	
+	_LOOP_ACTIVITY_BEGIN;
+	//设置锚点所占地图区域
+	area[i][j] = map[p->row - boxLength + 1 + i][p->col + j];
+	if ((area[i][j] == 3 || area[i][j] == 2) && targetBlock[i][j] == 1) {
+		return true;
 	}
+	_LOOP_ACTIVITY_END;
 	return false;
 }
-
-
 
 void Game::GenerateOutput() {
 	if (!update) {
 		return;
 	}
 	system("cls");
-	//先清除之前的移动方块
-	for (int i = 0; i < mapSize.y; i++) {
-		for (int j = 0; j < mapSize.x; j++) {
-			if (map[i][j] == 1) {
-				map[i][j] = 0;
-			}
-		}
+
+	//清除之前的移动方块
+	_LOOP_MAP_BEGIN;
+	if (map[i][j] == 1) {
+		map[i][j] = 0;
 	}
-	//再把现在的把移动方块画上去
-	for (int i = 0; i < boxLength; i++) {
-		for (int j = 0; j < boxLength; j++) {
-			if (map[p->row - boxLength + 1 + i][p->col + j] == 0) {
-				map[p->row - boxLength + 1 + i][p->col + j] = currentBlock[i][j];
-			}
-		}
+	_LOOP_MAP_END;
+
+	//把现在的把移动方块画上去
+	_LOOP_ACTIVITY_BEGIN;
+	if (map[p->row - boxLength + 1 + i][p->col + j] == 0) {
+		map[p->row - boxLength + 1 + i][p->col + j] = currentBlock[i][j];
 	}
+	_LOOP_ACTIVITY_END;
 
 	//输出
-	for (int i = 0; i < mapSize.y; i++) {
-		for (int j = 0; j < mapSize.x; j++) {
-			if (map[i][j] == 0) {
-				printf("  ");
-			}
-			else if (map[i][j] == 1) {
-				printf("△");
-			}
-			else if (map[i][j] == 2) {
-				printf("□");
-			}
-			else if (map[i][j] == 3) {
-				printf("☆");
-			}
-		}
+	_LOOP_MAP_BEGIN;
+	if (map[i][j] == 0) {
+		printf("  ");
+	}
+	else if (map[i][j] == 1) {
+		printf("△");
+	}
+	else if (map[i][j] == 2) {
+		printf("□");
+	}
+	else if (map[i][j] == 3) {
+		printf("☆");
+	}
+	if (j == mapSize.x - 1) {
 		cout << endl;
 	}
+	_LOOP_MAP_END;
+
 	//关闭更新
 	update = false;
 }
-
